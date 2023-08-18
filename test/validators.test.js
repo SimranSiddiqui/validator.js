@@ -1,5 +1,6 @@
 import assert from 'assert';
 import fs from 'fs';
+import timezone_mock from 'timezone-mock';
 import { format } from 'util';
 import vm from 'vm';
 import validator from '../src/index';
@@ -12498,6 +12499,27 @@ describe('Validators', () => {
     });
     test({
       validator: 'isTaxID',
+      args: ['es-AR'],
+      valid: [
+        '20271633638',
+        '23274986069',
+        '27333234519',
+        '30678561165',
+        '33693450239',
+        '30534868460',
+        '23111111129',
+        '34557619099'],
+      invalid: [
+        '20-27163363-8',
+        '20.27163363.8',
+        '33693450231',
+        '69345023',
+        '693450233123123',
+        '3369ew50231',
+        '34557619095'],
+    });
+    test({
+      validator: 'isTaxID',
       args: ['es-ES'],
       valid: [
         '00054237A',
@@ -13073,6 +13095,17 @@ describe('Validators', () => {
         '29.02.2020',
       ],
     });
+    // emulating Pacific time zone offset & time
+    // which could potentially result in UTC conversion issues
+    timezone_mock.register('US/Pacific');
+    test({
+      validator: 'isDate',
+      valid: [
+        new Date(2016, 2, 29),
+        '2017-08-04',
+      ],
+    });
+    timezone_mock.unregister();
   });
   it('should validate time', () => {
     test({
